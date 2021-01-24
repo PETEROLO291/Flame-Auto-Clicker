@@ -158,7 +158,6 @@ def click_loop():
                 repeat = int(repeat) - 1
                 clicking = True
                 sleep(float(delay))
-
                 if repeat == 1:
                     clicking = False
 
@@ -182,17 +181,18 @@ def detect_keys():
 
     while running:
         sleep(0.05)
-        try:
-            if keyboard.is_pressed(start_key) or start_pressed == True and startable == True:
-                clicking = True
-                start_pressed = False
+        if startable == True:
+            try:
+                if keyboard.is_pressed(start_key) or start_pressed == True:
+                    clicking = True
+                    start_pressed = False
 
-            elif keyboard.is_pressed(stop_key) or stop_pressed == True:
-                repeat = 1
-                clicking = False
-                stop_pressed = False
-        except:
-            pass
+                elif keyboard.is_pressed(stop_key) or stop_pressed == True:
+                    repeat = 1
+                    clicking = False
+                    stop_pressed = False
+            except:
+                pass
 
 start_k_check = Thread(target=detect_keys)
 
@@ -207,7 +207,6 @@ while running:
         st_click_loop.start()
         threads_started = True
 
-
     event, values = window.read(timeout=250)
 
     if start_key == "" or stop_key == "":
@@ -217,7 +216,7 @@ while running:
         window["-STOB-"].update(f"Start ({stop_key.upper()})")
 
     try:
-        if delay == "" or repeat == "":
+        if delay == "" or repeat == "" and cb_marked == False:
             window["-STAB-"].update(disabled=True)
             startable = False
 
