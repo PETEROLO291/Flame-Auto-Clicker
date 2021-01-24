@@ -152,7 +152,7 @@ def click_loop():
 
             sleep(0.05)
 
-            while repeat != 1 and clicking == True:
+            while repeat != 1 and clicking == True and running == True:
 
                 mouse.click(click_but)
                 repeat = int(repeat) - 1
