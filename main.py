@@ -124,7 +124,7 @@ def key_popup(window):
 
 # Frame layout
 frame = [   [sg.Text("Click Interval (Seconds):", font=("Arial", 13), pad=((0, 75), None)), sg.Text("Repeat x Times:", font=("Arial", 13), pad=((0, 25), None))],
-            [sg.Input(size=(30, 1), justification="c", default_text=0.0, key="-I1-"), sg.Input(size=(30, 1), justification="c", default_text=1000, key="-I2-")],
+            [sg.Input(size=(24, 1), justification="c", default_text=0, tooltip="eg: 0, 0.1, 0.5, 1, 1.5, 10, 80, 900...", key="-I1-", font=30), sg.Input(size=(24, 1), justification="c", default_text=1000, key="-I2-", font=30)],
             [sg.InputOptionMenu(('Left Click', 'Right Click'), key="-IOM-", pad=((15, 100), 2)), sg.Checkbox('Click until stoped', key="-CB-")],
             [sg.Text("—" * 1000)],
             [sg.Button(f"Start ({start_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STAB-"), sg.Button(f"Stop ({stop_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STOB-")],
