@@ -120,7 +120,7 @@ def key_popup(window):
     
 
     pop.close()
-    pop.write_event_value(event, None)
+    pop.write_event_value(event, None
 
 # Frame layout
 frame = [   [sg.Text("Click Interval (Seconds):", font=("Arial", 13), pad=((0, 75), None)), sg.Text("Repeat x Times:", font=("Arial", 13), pad=((0, 25), None))],
