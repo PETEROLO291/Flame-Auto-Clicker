@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import PySimpleGUI as sg
-import keyboard
-import mouse
+from mouse import click
+from keyboard import is_pressed
 from tkinter import TclError
 from time import sleep
 from threading import Thread
@@ -164,7 +164,7 @@ def click_loop():
 
             while repeat != 1 and clicking == True and running == True:
 
-                mouse.click(click_but)
+                click(click_but)
                 repeat = int(repeat) - 1
                 clicking = True
                 sleep(float(delay))
@@ -178,7 +178,7 @@ def click_loop():
             pass
 
         if clicking == True:
-            mouse.click(click_but)
+            click(click_but)
             sleep(float(delay))
 
 
@@ -192,11 +192,11 @@ def detect_keys():
         sleep(0.05)
         if startable == True:
 
-            if keyboard.is_pressed(start_key) or start_pressed == True:
+            if is_pressed(start_key) or start_pressed == True:
                 clicking = True
                 start_pressed = False
 
-            elif keyboard.is_pressed(stop_key) or stop_pressed == True:
+            elif is_pressed(stop_key) or stop_pressed == True:
                 repeat = 1
                 clicking = False
                 stop_pressed = False
