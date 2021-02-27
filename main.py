@@ -3,6 +3,7 @@
 import PySimpleGUI as sg
 import keyboard
 import mouse
+from tkinter import TclError
 from time import sleep
 from threading import Thread
 
@@ -48,7 +49,7 @@ try:
         start_key = read_start_key.read()
 
 
-except:
+except FileNotFoundError:
     with open("start_key.txt", "w+") as saved_start_key:
         saved_start_key.write("F6")
         saved_start_key.close()
@@ -59,7 +60,7 @@ try:
     with open("stop_key.txt", "r") as read_stop_key:
         stop_key = read_stop_key.read()
 
-except:
+except FileNotFoundError:
     with open("stop_key.txt", "w+") as saved_stop_key:
         saved_stop_key.write("F4")
         saved_stop_key.close()
@@ -190,17 +191,16 @@ def detect_keys():
     while running:
         sleep(0.05)
         if startable == True:
-            try:
-                if keyboard.is_pressed(start_key) or start_pressed == True:
-                    clicking = True
-                    start_pressed = False
 
-                elif keyboard.is_pressed(stop_key) or stop_pressed == True:
-                    repeat = 1
-                    clicking = False
-                    stop_pressed = False
-            except:
-                pass
+            if keyboard.is_pressed(start_key) or start_pressed == True:
+                clicking = True
+                start_pressed = False
+
+            elif keyboard.is_pressed(stop_key) or stop_pressed == True:
+                repeat = 1
+                clicking = False
+                stop_pressed = False
+
 
 # Creation of threads
 start_k_check = Thread(target=detect_keys)
@@ -226,6 +226,7 @@ while running:
         window["-STOB-"].update(f"Start ({stop_key.upper()})")
 
     try:
+        
         if delay == "" or repeat == "" and cb_marked == False:
             window["-STAB-"].update(disabled=True)
             startable = False
@@ -234,7 +235,7 @@ while running:
             window["-STAB-"].update(disabled=False)
             startable = True
 
-    except:
+    except TclError:
         pass
 
     if event == "Change Hotkeys":
@@ -243,21 +244,25 @@ while running:
 
 
     try:
+
         if clicking == False:
             delay = values['-I1-']
             repeat = values['-I2-']
 
-    except:
-        pass
+
+
     
-    # For some reason i have to read the input values 2 times to get them
+        # For some reason i have to read the input values 2 times to get them
+
+
+        if clicking == False:
+            delay = values['-I1-']
+            repeat = values['-I2-']
+
+    except TypeError:
+        pass
 
     try:
-        if clicking == False:
-            delay = values['-I1-']
-            repeat = values['-I2-']
-
-
         if delay == "":
             window['-I1-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
         
@@ -271,15 +276,18 @@ while running:
         else:
             window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
 
-    except:
+    except TclError:
         pass
 
 
+
     try:
+        
+        # -IOM- (Input Option Menu)
 
         if values["-IOM-"] == "Left Click":
             click_but = "left"
-        # -IOM- (Input Option Menu)
+
         if values["-IOM-"] == "Right Click":
             click_but = "right"
 
@@ -294,8 +302,10 @@ while running:
         
         if event == "-STOB-":
             stop_pressed = True
-    except:
+    
+    except TypeError:
         pass
+
     # Window closing event
     if event == sg.WINDOW_CLOSED or event == None:
         running = False
