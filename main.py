@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import PySimpleGUI as sg
-from mouse import click
+from mouse import click, double_click
 from keyboard import is_pressed
 from tkinter import TclError
 from time import sleep
@@ -39,6 +39,7 @@ start_pressed = False
 stop_pressed = False
 threads_started = False
 startable = True
+on_top = False
 
 
 
@@ -126,11 +127,12 @@ def key_popup(window):
 # Frame layout
 frame = [   [sg.Text("Click Interval (Seconds):", font=("Arial", 13), pad=((0, 75), None)), sg.Text("Repeat x Times:", font=("Arial", 13), pad=((0, 25), None))],
             [sg.Input(size=(24, 1), justification="c", default_text=0, tooltip="eg: 0, 0.1, 0.5, 1, 1.5, 10, 80, 900...", key="-I1-", font=30), sg.Input(size=(24, 1), justification="c", default_text=1000, key="-I2-", font=30)],
-            [sg.InputOptionMenu(('Left Click', 'Right Click'), key="-IOM-", pad=((15, 100), 2)), sg.Checkbox('Click until stoped', key="-CB-")],
+            [sg.Checkbox(("Allwais On Top"), pad=((20, 100), 2), key="-ONTOP-"), sg.Checkbox('Click until stoped', key="-CB-")],
+            [sg.InputOptionMenu(('Left Click', 'Right Click'), key="-BIOM-", pad=((15, 100), 2)), sg.InputOptionMenu(("Single Click", "Double Click"), key="-CTIOM-")],
             [sg.Text("—" * 1000)],
             [sg.Button(f"Start ({start_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STAB-"), sg.Button(f"Stop ({stop_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STOB-")],
             [sg.Button("Change Hotkeys", font=("Arial", 12), pad=(None, (10, 0)), size=(13, 0))],
-            [sg.Text("By PETEROLO 291", font=("Arial", 8), pad=(None, (10, 0)))]]
+            [sg.Text("By PETEROLO 291", font=("Arial", 8), pad=(None, (7, 0)))]]
 
 
 # Put layout inside a frame is just to add a super small margin that i whanted to add
@@ -141,7 +143,7 @@ layout = [  [sg.Text("Flame Auto Clicker", justification='c', size=(100, 1), pad
 
 
 # Window Config
-window = sg.Window('Flame Auto Clicker', layout, size=(530, 310), finalize=True, icon="flame_ico.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
+window = sg.Window('Flame Auto Clicker', layout, size=(530, 333), finalize=True, icon="flame_ico.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
 
 
 # Input details config
@@ -163,13 +165,22 @@ def click_loop():
             sleep(0.05)
 
             while repeat != 1 and clicking == True and running == True:
+                
+                if values["-CTIOM-"] == "Single Click":
+                    click(click_but)
+                    repeat = int(repeat) - 1
+                    clicking = True
+                    sleep(float(delay))
+                    if repeat == 1:
+                        clicking = False
 
-                click(click_but)
-                repeat = int(repeat) - 1
-                clicking = True
-                sleep(float(delay))
-                if repeat == 1:
-                    clicking = False
+                else:
+                    double_click(click_but)
+                    repeat = int(repeat) - 1
+                    clicking = True
+                    sleep(float(delay))
+                    if repeat == 1:
+                        clicking = False
 
 
 
@@ -178,9 +189,14 @@ def click_loop():
             pass
 
         if clicking == True:
-            click(click_but)
-            sleep(float(delay))
 
+            if values["-CTIOM-"] == "Single Click":
+                click(click_but)
+                sleep(float(delay))
+
+            else:
+                double_click(click_but)
+                sleep(float(delay))
 
 
 
@@ -218,6 +234,22 @@ while running:
         threads_started = True
 
     event, values = window.read(timeout=250)
+    
+    try:
+        if values["-ONTOP-"] == True:
+            on_top = True
+
+        elif values["-ONTOP-"] == False:
+            on_top = False
+        
+        if on_top == True:
+            window.TKroot.wm_attributes("-topmost", 1)
+
+        elif on_top == False:
+            window.TKroot.wm_attributes("-topmost", 0)
+
+    except TypeError:
+        pass
     
     if start_key == "" or stop_key == "":
         start_key = "F6"
@@ -283,12 +315,12 @@ while running:
 
     try:
         
-        # -IOM- (Input Option Menu)
+        # -BIOM- (Button Input Option Menu)
 
-        if values["-IOM-"] == "Left Click":
+        if values["-BIOM-"] == "Left Click":
             click_but = "left"
 
-        if values["-IOM-"] == "Right Click":
+        if values["-BIOM-"] == "Right Click":
             click_but = "right"
 
         if values["-CB-"] == True:
