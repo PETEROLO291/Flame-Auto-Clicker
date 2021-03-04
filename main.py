@@ -40,6 +40,7 @@ stop_pressed = False
 threads_started = False
 startable = True
 on_top = False
+looped = False
 
 
 
@@ -160,43 +161,50 @@ def click_loop():
 
     while running:
 
-        if cb_marked == False and clicking == True:
-
-            sleep(0.05)
-
-            while repeat != 1 and clicking == True and running == True:
+        try:
+            if cb_marked == False and clicking == True:
                 
+
+                sleep(0.05)
+
+                while int(repeat) != 1 and clicking == True and running == True:
+                    
+                    if values["-CTIOM-"] == "Single Click":
+                        click(click_but)
+                        repeat = int(repeat) - 1
+                        clicking = True
+                        sleep(float(delay))
+                        if repeat == 1:
+                            clicking = False
+
+                    else:
+                        double_click(click_but)
+                        repeat = int(repeat) - 1
+                        clicking = True
+                        sleep(float(delay))
+                        if repeat == 1:
+                            clicking = False
+
+
+
+            if clicking == False:
+                sleep(0.24)
+                pass
+
+            if clicking == True:
+
                 if values["-CTIOM-"] == "Single Click":
                     click(click_but)
-                    repeat = int(repeat) - 1
-                    clicking = True
                     sleep(float(delay))
-                    if repeat == 1:
-                        clicking = False
 
                 else:
                     double_click(click_but)
-                    repeat = int(repeat) - 1
-                    clicking = True
                     sleep(float(delay))
-                    if repeat == 1:
-                        clicking = False
 
-
-
-        if clicking == False:
-            sleep(0.24)
-            pass
-
-        if clicking == True:
-
-            if values["-CTIOM-"] == "Single Click":
-                click(click_but)
-                sleep(float(delay))
-
-            else:
-                double_click(click_but)
-                sleep(float(delay))
+                    
+        except ValueError:
+            clicking = False
+                    
 
 
 
@@ -234,6 +242,7 @@ while running:
         threads_started = True
 
     event, values = window.read(timeout=250)
+
     
     try:
         if values["-ONTOP-"] == True:
@@ -259,16 +268,20 @@ while running:
 
     try:
         
-        if delay == "" or repeat == "" and cb_marked == False:
+        if "-" in str(repeat) or str(repeat) in ("" ," ", "1", "0") and cb_marked == False and looped == True:
+            window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
             window["-STAB-"].update(disabled=True)
             startable = False
+
 
         else:
             window["-STAB-"].update(disabled=False)
             startable = True
+            window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
 
-    except TclError:
+    except (TclError, ValueError):
         pass
+
 
     if event == "Change Hotkeys":
         key_popup(window)
@@ -283,7 +296,6 @@ while running:
 
 
 
-    
         # For some reason i have to read the input values 2 times to get them
 
 
@@ -295,20 +307,15 @@ while running:
         pass
 
     try:
-        if delay == "":
+        if delay in ("", " ") or int(delay) < 0:
             window['-I1-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
         
 
         else:
             window['-I1-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
 
-        if repeat == "" and cb_marked == False:
-            window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
 
-        else:
-            window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
-
-    except TclError:
+    except (TclError, ValueError):
         pass
 
 
@@ -334,13 +341,15 @@ while running:
         
         if event == "-STOB-":
             stop_pressed = True
+        
     
     except TypeError:
         pass
 
+    looped = True
+
     # Window closing event
     if event == sg.WINDOW_CLOSED or event == None:
         running = False
-
 # Closing the window
 window.close()
