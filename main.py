@@ -241,7 +241,7 @@ while running:
         st_click_loop.start()
         threads_started = True
 
-    event, values = window.read(timeout=250)
+    event, values = window.read(timeout=50)
 
     
     try:
