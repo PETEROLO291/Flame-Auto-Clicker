@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
 import PySimpleGUI as sg
-from mouse import click, double_click
-from keyboard import is_pressed
-from tkinter import TclError
+import keyboard
+import mouse
 from time import sleep
 from threading import Thread
 
@@ -39,8 +38,6 @@ start_pressed = False
 stop_pressed = False
 threads_started = False
 startable = True
-on_top = False
-looped = False
 
 
 
@@ -51,7 +48,7 @@ try:
         start_key = read_start_key.read()
 
 
-except FileNotFoundError:
+except:
     with open("start_key.txt", "w+") as saved_start_key:
         saved_start_key.write("F6")
         saved_start_key.close()
@@ -62,7 +59,7 @@ try:
     with open("stop_key.txt", "r") as read_stop_key:
         stop_key = read_stop_key.read()
 
-except FileNotFoundError:
+except:
     with open("stop_key.txt", "w+") as saved_stop_key:
         saved_stop_key.write("F4")
         saved_stop_key.close()
@@ -98,7 +95,7 @@ def key_popup(window):
 
 
     # Popup window construction
-    pop = sg.Window('HotKeys', layout, size=(250, 110), element_justification="C", icon="flame_ico.ico", finalize=True)
+    pop = sg.Window('HotKeys', layout, size=(250, 110), element_justification="C", icon="icono.ico", finalize=True)
 
     # Popup event reading
     event, values = pop.read()
@@ -128,23 +125,21 @@ def key_popup(window):
 # Frame layout
 frame = [   [sg.Text("Click Interval (Seconds):", font=("Arial", 13), pad=((0, 75), None)), sg.Text("Repeat x Times:", font=("Arial", 13), pad=((0, 25), None))],
             [sg.Input(size=(24, 1), justification="c", default_text=0, tooltip="eg: 0, 0.1, 0.5, 1, 1.5, 10, 80, 900...", key="-I1-", font=30), sg.Input(size=(24, 1), justification="c", default_text=1000, key="-I2-", font=30)],
-            [sg.Checkbox(("Allwais On Top"), pad=((20, 100), 2), key="-ONTOP-"), sg.Checkbox('Click until stoped', key="-CB-")],
-            [sg.InputOptionMenu(('Left Click', 'Right Click'), key="-BIOM-", pad=((15, 100), 2)), sg.InputOptionMenu(("Single Click", "Double Click"), key="-CTIOM-")],
+            [sg.InputOptionMenu(('Left Click', 'Right Click'), key="-IOM-", default_value="Left Click", pad=((15, 100), 2)), sg.Checkbox('Click until stoped', key="-CB-")],
             [sg.Text("—" * 1000)],
             [sg.Button(f"Start ({start_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STAB-"), sg.Button(f"Stop ({stop_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STOB-")],
-            [sg.Button("Change Hotkeys", font=("Arial", 12), pad=(None, (10, 0)), size=(13, 0))],
-            [sg.Text("By PETEROLO 291", font=("Arial", 8), pad=(None, (7, 0)))]]
+            [sg.Button("Change Hotkeys", font=("Arial", 12), pad=(None, (13, 0)), size=(13, 0))]]
 
 
 # Put layout inside a frame is just to add a super small margin that i whanted to add
-layout = [  [sg.Text("Flame Auto Clicker", justification='c', size=(100, 1), pad=(None, (10, 0)) , font=("Freestyle Script", 35))],
+layout = [  [sg.Text("Shadow Auto Clicker", justification='c', size=(100, 1), pad=(None, (10, 0)) , font=("Freestyle Script", 35))],
             [sg.Text("—" * 1000)],
             [sg.Frame(None, frame, element_justification='c', border_width=0)]]
 
 
 
 # Window Config
-window = sg.Window('Flame Auto Clicker', layout, size=(530, 333), finalize=True, icon="flame_ico.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
+window = sg.Window('Shadow Auto Clicker', layout, size=(525, 287), finalize=True, icon="icono.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
 
 
 # Input details config
@@ -161,50 +156,29 @@ def click_loop():
 
     while running:
 
-        try:
-            if cb_marked == False and clicking == True:
-                
+        if cb_marked == False and clicking == True:
 
-                sleep(0.05)
+            sleep(0.05)
 
-                while int(repeat) != 1 and clicking == True and running == True:
-                    
-                    if values["-CTIOM-"] == "Single Click":
-                        click(click_but)
-                        repeat = int(repeat) - 1
-                        clicking = True
-                        sleep(float(delay))
-                        if repeat == 1:
-                            clicking = False
+            while repeat != 1 and clicking == True and running == True:
 
-                    else:
-                        double_click(click_but)
-                        repeat = int(repeat) - 1
-                        clicking = True
-                        sleep(float(delay))
-                        if repeat == 1:
-                            clicking = False
+                mouse.click(click_but)
+                repeat = int(repeat) - 1
+                clicking = True
+                sleep(float(delay))
+                if repeat == 1:
+                    clicking = False
 
 
 
-            if clicking == False:
-                sleep(0.24)
-                pass
+        if clicking == False:
+            sleep(0.24)
+            pass
 
-            if clicking == True:
+        if clicking == True:
+            mouse.click(click_but)
+            sleep(float(delay))
 
-                if values["-CTIOM-"] == "Single Click":
-                    click(click_but)
-                    sleep(float(delay))
-
-                else:
-                    double_click(click_but)
-                    sleep(float(delay))
-
-                    
-        except ValueError:
-            clicking = False
-                    
 
 
 
@@ -215,16 +189,17 @@ def detect_keys():
     while running:
         sleep(0.05)
         if startable == True:
+            try:
+                if keyboard.is_pressed(start_key) or start_pressed == True:
+                    clicking = True
+                    start_pressed = False
 
-            if is_pressed(start_key) or start_pressed == True:
-                clicking = True
-                start_pressed = False
-
-            elif is_pressed(stop_key) or stop_pressed == True:
-                repeat = 1
-                clicking = False
-                stop_pressed = False
-
+                elif keyboard.is_pressed(stop_key) or stop_pressed == True:
+                    repeat = 1
+                    clicking = False
+                    stop_pressed = False
+            except:
+                pass
 
 # Creation of threads
 start_k_check = Thread(target=detect_keys)
@@ -234,31 +209,13 @@ st_click_loop = Thread(target=click_loop)
 
 #···Main PySimpleGui event loop···#
 while running:
-
     # Start threads
     if threads_started == False:
         start_k_check.start()
         st_click_loop.start()
         threads_started = True
 
-    event, values = window.read(timeout=50)
-
-    
-    try:
-        if values["-ONTOP-"] == True:
-            on_top = True
-
-        elif values["-ONTOP-"] == False:
-            on_top = False
-        
-        if on_top == True:
-            window.TKroot.wm_attributes("-topmost", 1)
-
-        elif on_top == False:
-            window.TKroot.wm_attributes("-topmost", 0)
-
-    except TypeError:
-        pass
+    event, values = window.read(timeout=150)
     
     if start_key == "" or stop_key == "":
         start_key = "F6"
@@ -267,21 +224,16 @@ while running:
         window["-STOB-"].update(f"Start ({stop_key.upper()})")
 
     try:
-        
-        if "-" in str(repeat) or str(repeat) in ("" ," ", "1", "0") and cb_marked == False and looped == True:
-            window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
+        if delay == "" or repeat == "" and cb_marked == False:
             window["-STAB-"].update(disabled=True)
             startable = False
-
 
         else:
             window["-STAB-"].update(disabled=False)
             startable = True
-            window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
 
-    except (TclError, ValueError):
+    except:
         pass
-
 
     if event == "Change Hotkeys":
         key_popup(window)
@@ -289,45 +241,44 @@ while running:
 
 
     try:
-
         if clicking == False:
             delay = values['-I1-']
             repeat = values['-I2-']
 
-
-
-        # For some reason i have to read the input values 2 times to get them
-
-
-        if clicking == False:
-            delay = values['-I1-']
-            repeat = values['-I2-']
-
-    except TypeError:
+    except:
         pass
+    
+    # For some reason i have to read the input values 2 times to get them
 
     try:
-        if delay in ("", " ") or int(delay) < 0:
+        if clicking == False:
+            delay = values['-I1-']
+            repeat = values['-I2-']
+
+
+        if delay == "":
             window['-I1-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
         
 
         else:
             window['-I1-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
 
+        if repeat == "" and cb_marked == False:
+            window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
 
-    except (TclError, ValueError):
+        else:
+            window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
+
+    except:
         pass
 
 
-
     try:
-        
-        # -BIOM- (Button Input Option Menu)
 
-        if values["-BIOM-"] == "Left Click":
+        if values["-IOM-"] == "Left Click":
             click_but = "left"
-
-        if values["-BIOM-"] == "Right Click":
+        # -IOM- (Input Option Menu)
+        if values["-IOM-"] == "Right Click":
             click_but = "right"
 
         if values["-CB-"] == True:
@@ -341,15 +292,11 @@ while running:
         
         if event == "-STOB-":
             stop_pressed = True
-        
-    
-    except TypeError:
+    except:
         pass
-
-    looped = True
-
     # Window closing event
     if event == sg.WINDOW_CLOSED or event == None:
         running = False
+
 # Closing the window
 window.close()
