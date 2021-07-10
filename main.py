@@ -95,7 +95,7 @@ def key_popup(window):
 
 
     # Popup window construction
-    pop = sg.Window('HotKeys', layout, size=(250, 110), element_justification="C", icon="icono.ico", finalize=True)
+    pop = sg.Window('HotKeys', layout, size=(250, 110), element_justification="C", icon="ico.ico", finalize=True)
 
     # Popup event reading
     event, values = pop.read()
@@ -132,14 +132,14 @@ frame = [   [sg.Text("Click Interval (Seconds):", font=("Arial", 13), pad=((0, 7
 
 
 # Put layout inside a frame is just to add a super small margin that i whanted to add
-layout = [  [sg.Text("Shadow Auto Clicker", justification='c', size=(100, 1), pad=(None, (10, 0)) , font=("Freestyle Script", 35))],
+layout = [  [sg.Text("Flame Auto Clicker", justification='c', size=(100, 1), pad=(None, (10, 0)) , font=("Freestyle Script", 35))],
             [sg.Text("—" * 1000)],
             [sg.Frame(None, frame, element_justification='c', border_width=0)]]
 
 
 
 # Window Config
-window = sg.Window('Shadow Auto Clicker', layout, size=(525, 287), finalize=True, icon="icono.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
+window = sg.Window('Flame Auto Clicker', layout, size=(525, 287), finalize=True, icon="ico.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
 
 
 # Input details config
