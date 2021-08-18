@@ -264,7 +264,6 @@ while running:
         if "-" in str(repeat) or str(repeat) in ("" ," ", "0") and cb_marked == False and looped == True:
             window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2) # Al dar stop pasa lee 1 vece esta parte de codigo haciendo el boton start flashear
             window["-STAB-"].update(disabled=True)
-            print("a")
             startable = False
 
         else:
