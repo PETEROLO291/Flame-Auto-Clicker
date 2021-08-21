@@ -6,6 +6,7 @@ from keyboard import is_pressed
 from tkinter import TclError
 from time import sleep
 from threading import Thread
+from os import system
 
 
 # Made By PETEROLO 291©
@@ -41,6 +42,9 @@ threads_started = False
 startable = True
 on_top = False	
 looped = False
+opacity = 1
+slide_bar_val = 100
+locked_opacity = None
 
 
 
@@ -51,7 +55,7 @@ try:
 
 
 except FileNotFoundError:
-    with open("start_key.txt", "w+") as saved_start_key:
+    with open("start_key.txt", "w") as saved_start_key:
         saved_start_key.write("F6")
         saved_start_key.close()
 
@@ -62,24 +66,46 @@ try:
         stop_key = read_stop_key.read()
 
 except FileNotFoundError:
-    with open("stop_key.txt", "w+") as saved_stop_key:
+    with open("stop_key.txt", "w") as saved_stop_key:
         saved_stop_key.write("F4")
         saved_stop_key.close()
 
+# Try to open opacity file, or create it in case doesn't exist
+try:
+    with open("opacity.txt", "r") as opacity:
+        opacity = opacity.read()
 
+
+except FileNotFoundError:
+    with open("opacity.txt", "w") as create_opacity:
+        create_opacity.write("1.0")
+        create_opacity.close()
+
+
+with open("opacity.txt", "r") as locked_opacity:
+    locked_opacity = locked_opacity.read()
+    print(str(locked_opacity))
+    print(str(opacity))
 
 
 #··Window Elements··#
 
+# Function to get the slider bar value
+def new_opa():
+    global opacity, slide_bar_val
+    slide_bar_val = float(opacity) * 100
+
 # Custop popup window to configure the Start and Stop keys
 def key_popup(window):
-    global start_key, stop_key, values
+    global start_key, stop_key, opacity, running, slide_bar_val, locked_opacity
+
+    new_opa()
     
     sg.LOOK_AND_FEEL_TABLE['CustomDarkTheme'] = {'BACKGROUND': '#373737',
                                             'TEXT': '#FFFFFF',
                                             'INPUT': '#474747',
                                             'TEXT_INPUT': '#FFFFFF',
-                                            'SCROLL': '#ff00d4',
+                                            'SCROLL': '#515151',
                                             'BUTTON': ('white', '#474747'),
                                             'PROGRESS': ('#01826B', '#D0D0D0'),
                                             'BORDER': 0, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
@@ -92,23 +118,44 @@ def key_popup(window):
 
     # Popup layout
     layout = [  [sg.Text("Start Key", pad=((0, 13), None), font=("Arial", 13)), sg.Text("Stop Key", font=("Arial", 13))],
-                [sg.Input(default_text=start_key ,size=(3, 1), font=("Arial", 15), pad=((0, 40), None), key="-K1-"), sg.Input(default_text=stop_key, size=(3, 1), font=("Arial", 15), key="-K2-")],
+                [sg.Input(default_text=start_key ,size=(3, 1), font=("Arial", 15), pad=((0, 42), None), key="-K1-"), sg.Input(default_text=stop_key, size=(3, 1), font=("Arial", 15), key="-K2-")],
+                [sg.Slider(range=(1,100), default_value=slide_bar_val, size=(20,15), orientation='horizontal', font=('Arial', 12), pad=(25, (0, 0)), key="-SLI-")],
                 [sg.Button("Save", size=(10, 1), pad=((0, 0), 8), font=("Arial", 11))]]
 
 
     # Popup window construction
-    pop = sg.Window('HotKeys', layout, size=(250, 110), element_justification="C", icon="ico.ico", finalize=True)
+    pop = sg.Window('HotKeys', layout, size=(250, 150), element_justification="C", icon="ico.ico", finalize=True)
 
     # Popup event reading
-    event, values = pop.read()
+    event2, values2 = pop.read()
 
     # If Save button is pressed:
-    if event == "Save":
-        start_key = str(values["-K1-"]) # Save the input values into a variable
-        stop_key = str(values["-K2-"])
+    if event2 != sg.WINDOW_CLOSED or event2 != None:
+        opacity = int(values2["-SLI-"])
+        opacity = opacity/100
 
-        window["-STAB-"].update(f"Start ({start_key.upper()})") # Edit start and stop button text
-        window["-STOB-"].update(f"Start ({stop_key.upper()})")
+    with open("opacity.txt", "w") as write_opacity:
+        write_opacity.write(str(opacity))
+        write_opacity.close()
+    
+    print(str(locked_opacity))
+    print(str(opacity))
+
+    if event2 == "Save" and float(opacity) != float(locked_opacity):
+        print("Opacidad " + str(opacity) + " Locked: " +  str(locked_opacity))
+        start_key = str(values2["-K1-"]) # Save the input values into a variable
+        stop_key = str(values2["-K2-"])
+        print("aaaaa xD")
+        system("restart-link.vbs")
+        running = False
+
+    elif event2 != sg.WINDOW_CLOSED or event2 != None:
+        start_key = str(values2["-K1-"]) # Save the input values into a variable
+        stop_key = str(values2["-K2-"])
+
+
+        window["-STAB-"].update(f"Start ({start_key.upper()})") # Edit start button text
+        window["-STOB-"].update(f"Start ({stop_key.upper()})") # Edit stop button text
 
     with open("start_key.txt", "w+") as save_start_key:
         save_start_key.write(start_key.upper()) # Save start key in txt file
@@ -120,7 +167,7 @@ def key_popup(window):
         save_stop_key.close()
 
     
-    pop.write_event_value(event, None)
+    pop.write_event_value(event2, None)
     pop.close()
 
 
@@ -142,7 +189,7 @@ layout = [  [sg.Text("Flame Auto Clicker", justification='c', size=(100, 1), pad
 
 
 # Window Config
-window = sg.Window('Flame Auto Clicker', layout, size=(505, 293), finalize=True, icon="ico.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
+window = sg.Window('Flame Auto Clicker', layout, size=(505, 293), alpha_channel=opacity, finalize=True, icon="ico.ico", keep_on_top=False, element_justification="c", margins=(0, 0))
 
 
 # Input details config
