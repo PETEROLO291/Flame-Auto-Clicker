@@ -84,8 +84,6 @@ except FileNotFoundError:
 
 with open("opacity.txt", "r") as locked_opacity:
     locked_opacity = locked_opacity.read()
-    print(str(locked_opacity))
-    print(str(opacity))
 
 
 #··Window Elements··#
@@ -138,14 +136,10 @@ def key_popup(window):
         write_opacity.write(str(opacity))
         write_opacity.close()
     
-    print(str(locked_opacity))
-    print(str(opacity))
 
     if event2 == "Save" and float(opacity) != float(locked_opacity):
-        print("Opacidad " + str(opacity) + " Locked: " +  str(locked_opacity))
         start_key = str(values2["-K1-"]) # Save the input values into a variable
         stop_key = str(values2["-K2-"])
-        print("aaaaa xD")
         system("restart-link.vbs")
         running = False
 
