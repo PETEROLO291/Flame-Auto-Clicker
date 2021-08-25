@@ -125,7 +125,7 @@ def key_popup(window):
 
 
     # Popup window construction
-    pop = sg.Window('HotKeys', layout, size=(280, 219), element_justification="C", icon="ico.ico", finalize=True)
+    pop = sg.Window('Settings', layout, size=(280, 219), element_justification="C", icon="ico.ico", finalize=True)
 
     # Popup event reading
     event2, values2 = pop.read()
