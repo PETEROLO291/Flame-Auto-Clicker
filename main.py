@@ -117,12 +117,15 @@ def key_popup(window):
     # Popup layout
     layout = [  [sg.Text("Start Key", pad=((0, 13), None), font=("Arial", 13)), sg.Text("Stop Key", font=("Arial", 13))],
                 [sg.Input(default_text=start_key ,size=(3, 1), font=("Arial", 15), pad=((0, 42), None), key="-K1-"), sg.Input(default_text=stop_key, size=(3, 1), font=("Arial", 15), key="-K2-")],
+                [sg.Text("—" * 25, pad=((0, 0), 0), font=("Arial", 13))],
+                [sg.Text("Opacity", pad=((0, 0), 0), font=("Arial", 13))],
                 [sg.Slider(range=(1,100), default_value=slide_bar_val, size=(20,15), orientation='horizontal', font=('Arial', 12), pad=(25, (0, 0)), key="-SLI-")],
-                [sg.Button("Save", size=(10, 1), pad=((0, 0), 8), font=("Arial", 11))]]
+                [sg.Text("—" * 25, pad=((0, 0), 8), font=("Arial", 13))],
+                [sg.Button("Save", size=(10, 1), pad=((0, 0), 0), font=("Arial", 11))]]
 
 
     # Popup window construction
-    pop = sg.Window('HotKeys', layout, size=(250, 150), element_justification="C", icon="ico.ico", finalize=True)
+    pop = sg.Window('HotKeys', layout, size=(280, 219), element_justification="C", icon="ico.ico", finalize=True)
 
     # Popup event reading
     event2, values2 = pop.read()
@@ -172,7 +175,7 @@ frame = [   [sg.Text("Click Interval (Seconds):", font=("Arial", 13), pad=((0, 7
             [sg.InputOptionMenu(('Left Click', 'Right Click'), default_value="Left Click", key="-BIOM-", pad=((15, 100), 2)), sg.InputOptionMenu(("Single Click", "Double Click"), default_value="Single Click", key="-CTIOM-")],	
             [sg.Text("—" * 1000)],	
             [sg.Button(f"Start ({start_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STAB-"), sg.Button(f"Stop ({stop_key})", font=("Arial", 15), pad=(5, (0, 0)), key="-STOB-")],	
-            [sg.Button("Change Hotkeys", font=("Arial", 12), pad=(None, (10, 0)), size=(13, 0))]]
+            [sg.Button("Settings", font=("Arial", 12), pad=(None, (10, 0)), size=(13, 0))]]
 
 
 # Put layout inside a frame is just to add a super small margin that i whanted to add
@@ -314,7 +317,7 @@ while running:
     except (TclError, ValueError):
         pass
 
-    if event == "Change Hotkeys":
+    if event == "Settings":
         key_popup(window)
 
 
