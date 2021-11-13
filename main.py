@@ -13,7 +13,7 @@ from keyboard import is_pressed
 
 
 # Custop dark theme configuration
-sg.LOOK_AND_FEEL_TABLE['CustomDarkTheme'] = {'BACKGROUND': '#373737',
+sg.theme_add_new('CustomDarkTheme', {'BACKGROUND': '#373737',
                                         'TEXT': '#FFFFFF',
                                         'INPUT': '#474747',
                                         'TEXT_INPUT': '#FFFFFF',
@@ -21,7 +21,7 @@ sg.LOOK_AND_FEEL_TABLE['CustomDarkTheme'] = {'BACKGROUND': '#373737',
                                         'BUTTON': ('white', '#474747'),
                                         'PROGRESS': ('#01826B', '#D0D0D0'),
                                         'BORDER': 0, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
-                                        }
+                                        })
 
 
 sg.theme("CustomDarkTheme")
@@ -45,8 +45,7 @@ looped = False
 opacity = 1
 slide_bar_val = 100
 locked_opacity = None
-
-
+error = False
 
 # Try to oppen start key file, or create it in case doesnt exist
 try:
@@ -99,7 +98,7 @@ def key_popup(window):
 
     new_opa()
 
-    sg.LOOK_AND_FEEL_TABLE['CustomDarkTheme'] = {'BACKGROUND': '#373737',
+    sg.theme_add_new('CustomDarkTheme', {'BACKGROUND': '#373737',
                                             'TEXT': '#FFFFFF',
                                             'INPUT': '#474747',
                                             'TEXT_INPUT': '#FFFFFF',
@@ -107,7 +106,7 @@ def key_popup(window):
                                             'BUTTON': ('white', '#474747'),
                                             'PROGRESS': ('#01826B', '#D0D0D0'),
                                             'BORDER': 0, 'SLIDER_DEPTH': 0, 'PROGRESS_DEPTH': 0,
-                                            }
+                                            })
 
 
     # Set popup theme
@@ -125,7 +124,8 @@ def key_popup(window):
 
 
     # Popup window construction
-    pop = sg.Window('Settings', layout, size=(280, 219), element_justification="C", icon="ico.ico", finalize=True)
+    pop = sg.Window('Settings', layout, size=(280, 219), element_justification="C", icon="ico.ico", finalize=True, keep_on_top=True)
+
 
     # Popup event reading
     event2, values2 = pop.read()
@@ -305,16 +305,50 @@ while running:
 
     try:
 
-        if "-" in str(repeat) or str(repeat) in ("" ," ", "0") and cb_marked == False and looped == True:
-            window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
-            window["-STAB-"].update(disabled=True)
-            startable = False
+        if looped == True: # Since fist in first loop "repeat" is 0 this conditional prevents this piece of code from running
+            try:
+                if "-" in str(repeat) or "0" == str(repeat) or " " in str(repeat) and str(repeat) and cb_marked == False and looped == True:
+                    window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=1)
+                    window["-STAB-"].update(disabled=True)
+                    startable = False
 
-        else:
-            window["-STAB-"].update(disabled=False)
-            startable = True
+                if str(repeat) == "" and cb_marked == True:
+                    window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
+                    window["-STAB-"].update(disabled=False)
+                    startable = True
 
-    except (TclError, ValueError):
+                elif int(repeat) >= 1:
+                    window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
+                    window["-STAB-"].update(disabled=False)
+                    startable = True
+                    error = False
+
+            except (ValueError):
+                window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=1)
+                window["-STAB-"].update(disabled=True)
+                startable = False
+                error = True
+
+
+            try:
+                if "-" in str(delay) or " " in str(delay) and looped == True:
+                    window['-I1-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=1)
+                    window["-STAB-"].update(disabled=True)
+                    startable = False
+
+                elif int(delay) >= 0:
+                    window['-I1-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
+                    startable = True
+                    error = False
+
+            except (ValueError):
+                window['-I1-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=1)
+                window["-STAB-"].update(disabled=True)
+                startable = False
+                error = True
+
+
+    except (TclError):
         pass
 
     if event == "Settings":
@@ -338,18 +372,6 @@ while running:
             repeat = values['-I2-']
 
 
-        if delay == "":
-            window['-I1-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
-
-
-        else:
-            window['-I1-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
-
-        if repeat == "" and cb_marked == False:
-            window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=2)
-
-        else:
-            window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
 
     except:
         pass
