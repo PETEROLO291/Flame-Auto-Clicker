@@ -31,9 +31,10 @@ sg.theme("CustomDarkTheme")
 running = True
 start_key = "F6"
 stop_key = "F4"
+global_key = ""
 click_but = "left"
 clicking = False
-delay = 0
+delay = float
 repeat = 0
 cb_marked = False
 start_pressed = False
@@ -152,7 +153,7 @@ def key_popup(window):
 
 
         window["-STAB-"].update(f"Start ({start_key.upper()})") # Edit start button text
-        window["-STOB-"].update(f"Start ({stop_key.upper()})") # Edit stop button text
+        window["-STOB-"].update(f"Stop ({stop_key.upper()})") # Edit stop button text
 
     with open("start_key.txt", "w+") as save_start_key:
         save_start_key.write(start_key.upper()) # Save start key in txt file
@@ -169,8 +170,8 @@ def key_popup(window):
 
 
 # Frame layout
-frame = [   [sg.Text("Click Interval (Seconds):", font=("Arial", 13), pad=((0, 75), None)), sg.Text("Repeat x Times:", font=("Arial", 13), pad=((0, 25), None))],
-            [sg.Input(size=(24, 1), justification="c", default_text=0, tooltip="eg: 0, 0.1, 0.5, 1, 1.5, 10, 80, 900...", key="-I1-", font=30), sg.Input(size=(24, 1), justification="c", default_text=1000, key="-I2-", font=30)],
+frame = [   [sg.Text("Click Interval (milliseconds):", font=("Arial", 13), pad=((0, 70), None)), sg.Text("Repeat x Times:", font=("Arial", 13), pad=((0, 45), None))],
+            [sg.Input(size=(24, 1), justification="c", default_text=100, tooltip="e.g: 0, 50, 100, 500, 1000...", key="-I1-", font=30), sg.Input(size=(24, 1), justification="c", default_text=1000, key="-I2-", font=30)],
             [sg.Checkbox(("Allwais On Top"), pad=((20, 100), 2), key="-ONTOP-"), sg.Checkbox('Click until stoped', key="-CB-")],
             [sg.InputOptionMenu(('Left Click', 'Right Click'), default_value="Left Click", key="-BIOM-", pad=((15, 100), 2)), sg.InputOptionMenu(("Single Click", "Double Click"), default_value="Single Click", key="-CTIOM-")],
             [sg.Text("—" * 1000)],
@@ -197,51 +198,42 @@ window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#
 # ]---Backend---[
 
 
+
 # Loop where the click events are created
 def click_loop():
     global clicking, delay, cb_marked, repeat
 
     while running:
-        try:
+
 
             if cb_marked == False and clicking == True:
 
 
                 sleep(0.05)
 
-                while repeat != 1 and clicking == True and running == True:
+                while repeat != 0 and clicking == True and running == True and values["-CTIOM-"] == "Single Click":
 
                     click(click_but)
                     repeat = int(repeat) - 1
-                    clicking = True
                     sleep(float(delay))
+
                     if repeat == 1:
                         clicking = False
 
-                    else:
-                        double_click(click_but)
-                        repeat = int(repeat) - 1
-                        clicking = True
-                        sleep(float(delay))
-                        if repeat == 1:
-                            clicking = False
+                while repeat != 0 and clicking == True and running == True and values["-CTIOM-"] == "Double Click":
+                    
+                    double_click(click_but)
+                    repeat = int(repeat) - 1
+                    sleep(float(delay))
+
+                    if repeat == 1:
+                        clicking = False
 
 
 
             if clicking == False:
                 sleep(0.24)
                 pass
-
-            if clicking == True:
-                if values["-CTIOM-"] == "Single Click":
-                    click(click_but)
-                    sleep(float(delay))
-                else:
-                    double_click(click_but)
-                    sleep(float(delay))
-
-        except:
-            clicking = False
 
 
 
@@ -255,14 +247,41 @@ def detect_keys():
         sleep(0.05)
         if startable == True:
             try:
-                if is_pressed(start_key) or start_pressed == True:
-                    clicking = True
-                    start_pressed = False
+                if start_key != stop_key:
+                    
+                    if is_pressed(start_key) or start_pressed == True:
+                        repeat = int(repeat) + 1
+                        clicking = True
+                        start_pressed = False
+                        sleep(0.3)
 
-                elif is_pressed(stop_key) or stop_pressed == True:
-                    repeat = 1
-                    clicking = False
-                    stop_pressed = False
+                    elif is_pressed(stop_key) or stop_pressed == True:
+                        repeat = 1
+                        clicking = False
+                        stop_pressed = False
+
+                if start_key == stop_key:
+                    global_key = start_key and stop_key
+
+                    if start_pressed == True:
+                        repeat = int(repeat) + 1
+                        clicking = True
+                        start_pressed = False
+                        sleep(1)
+                    
+                    if stop_pressed == True:
+                        clicking = False
+                        stop_pressed = False
+                        
+
+                    if is_pressed(global_key) and clicking == False:
+                        repeat = int(repeat) + 1
+                        clicking = True
+                        sleep(0.3)
+
+                    if is_pressed(global_key) and clicking == True:
+                        clicking = False
+                        sleep(0.3)
             except:
                 pass
 
@@ -307,7 +326,7 @@ while running:
 
         if looped == True: # Since fist in first loop "repeat" is 0 this conditional prevents this piece of code from running
             try:
-                if "-" in str(repeat) or "0" == str(repeat) or " " in str(repeat) and str(repeat) and cb_marked == False and looped == True:
+                if "-" in str(repeat) or str(repeat) == "0" or " " in str(repeat) and str(repeat) and cb_marked == False and looped == True:
                     window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=1)
                     window["-STAB-"].update(disabled=True)
                     startable = False
@@ -317,13 +336,13 @@ while running:
                     window["-STAB-"].update(disabled=False)
                     startable = True
 
-                elif int(repeat) >= 1:
+                elif int(repeat) > 0:
                     window['-I2-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
                     window["-STAB-"].update(disabled=False)
                     startable = True
                     error = False
 
-            except (ValueError):
+            except ValueError:
                 window['-I2-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=1)
                 window["-STAB-"].update(disabled=True)
                 startable = False
@@ -336,19 +355,19 @@ while running:
                     window["-STAB-"].update(disabled=True)
                     startable = False
 
-                elif int(delay) >= 0:
+                elif float(delay) >= 0:
                     window['-I1-'].Widget.configure(highlightcolor='#FFFFFF', highlightbackground="#9C9C9C", insertbackground="White", highlightthickness=1)
                     startable = True
                     error = False
 
-            except (ValueError):
+            except ValueError:
                 window['-I1-'].Widget.configure(highlightcolor='red', highlightbackground="red", insertbackground="White", highlightthickness=1)
                 window["-STAB-"].update(disabled=True)
                 startable = False
                 error = True
 
 
-    except (TclError):
+    except TclError:
         pass
 
     if event == "Settings":
@@ -359,22 +378,27 @@ while running:
     try:
         if clicking == False:
             delay = values['-I1-']
+            delay = float(delay) / 1000
             repeat = values['-I2-']
+            
 
-    except:
-        pass
+    except (TypeError, ValueError):
+
+        startable = False
+        error = True
 
     # For some reason i have to read the input values 2 times to get them
 
     try:
         if clicking == False:
-            delay = values['-I1-']
+            delay = float(values['-I1-'])
+            delay = float(delay) / 1000
             repeat = values['-I2-']
+            
+    except (TypeError, ValueError):
 
-
-
-    except:
-        pass
+        startable = False
+        error = True
 
 
     try:
@@ -397,6 +421,7 @@ while running:
 
     except TypeError:
         pass
+
     looped = True
     # Window closing event
     if event == sg.WINDOW_CLOSED or event == None:
