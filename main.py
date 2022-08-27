@@ -208,7 +208,6 @@ def click_loop():
 
             if cb_marked == False and clicking == True:
 
-
                 sleep(0.05)
 
                 while repeat != 0 and clicking == True and running == True and values["-CTIOM-"] == "Single Click":
@@ -228,6 +227,22 @@ def click_loop():
 
                     if repeat == 1:
                         clicking = False
+
+
+            elif cb_marked == True and clicking == True:
+
+                sleep(0.05)
+
+                while clicking == True and running == True and values["-CTIOM-"] == "Single Click":
+
+                    click(click_but)
+                    sleep(float(delay))
+
+
+                while clicking == True and running == True and values["-CTIOM-"] == "Double Click":
+                    
+                    double_click(click_but)
+                    sleep(float(delay))
 
 
 
