@@ -26,6 +26,7 @@ sg.theme_add_new('CustomDarkTheme', {'BACKGROUND': '#373737',
 
 sg.theme("CustomDarkTheme")
 
+
 # Variables
 
 running = True
