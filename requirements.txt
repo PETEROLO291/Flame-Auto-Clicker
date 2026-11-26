@@ -1,3 +1,1 @@
-keyboard==0.13.5
-mouse==0.7.1
-PySimpleGUI==4.55.1
+customtkinter>=5.2.0
